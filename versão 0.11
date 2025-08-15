@@ -253,10 +253,10 @@ class JarvisLayout(MDBoxLayout):
         self.alarmes = self.memoria.get("alarmes", [])
         self.lembretes = self.memoria.get("lembretes", [])
         self.anotacoes = self.memoria.get("anotacoes", [])
+        self.modo_silencioso = self.memoria.get('modo_silencioso', False)
         self.estado_memoria = 'nome' if 'nome' not in self.memoria else 'normal'
         self.falando = False
         self.encerrando = False
-        self.modo_silencioso = False
 
         # HUD visual no topo
         self.hud = JarvisHUD()
@@ -774,14 +774,19 @@ class JarvisLayout(MDBoxLayout):
                 self.falar("O que você quer que eu diga?")
             return
 
+        comando_lower = comando.lower().strip()
+
         if comando_lower in ["ativar modo silencioso", "modo silencioso"]:
             self.modo_silencioso = True
+            self.memoria['modo_silencioso'] = True
+            self.salvar_memoria()
             self.falar("Modo silencioso ativado. Agora só responderei por texto.")
             return
 
-        #MODO SILENCIOSO
         if comando_lower in ["desativar modo silencioso", "desligar modo silencioso", "pode falar"]:
             self.modo_silencioso = False
+            self.memoria['modo_silencioso'] = False
+            self.salvar_memoria()
             self.falar("Modo silencioso desativado. Voltarei a falar normalmente.")
             return
 
