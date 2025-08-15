@@ -256,6 +256,7 @@ class JarvisLayout(MDBoxLayout):
         self.estado_memoria = 'nome' if 'nome' not in self.memoria else 'normal'
         self.falando = False
         self.encerrando = False
+        self.modo_silencioso = False
 
         # HUD visual no topo
         self.hud = JarvisHUD()
@@ -444,6 +445,11 @@ class JarvisLayout(MDBoxLayout):
         duracao_estimada = min(max(len(texto.split()) * 0.5, 1.5), 10)
         self.hud.iniciar_fala(duracao_estimada)
 
+        if self.modo_silencioso:
+            print("[Modo Silencioso] Jarvis respondeu apenas com texto.")
+            self.hud.parar_fala()
+            return
+
         def play_audio():
             self.falando = True
             try:
@@ -453,7 +459,6 @@ class JarvisLayout(MDBoxLayout):
                 pygame.mixer.music.load(filename)
                 pygame.mixer.music.play()
 
-                # Mantém a animação enquanto o áudio estiver tocando
                 while pygame.mixer.music.get_busy():
                     pygame.time.Clock().tick(10)
 
@@ -465,6 +470,7 @@ class JarvisLayout(MDBoxLayout):
             self.hud.parar_fala()
 
         threading.Thread(target=play_audio, daemon=True).start()
+
     def abrir_site_por_nome(self, nome):
         nome = nome.lower()
 
@@ -766,6 +772,17 @@ class JarvisLayout(MDBoxLayout):
                 self.falar(frase)
             else:
                 self.falar("O que você quer que eu diga?")
+            return
+
+        if comando_lower in ["ativar modo silencioso", "modo silencioso"]:
+            self.modo_silencioso = True
+            self.falar("Modo silencioso ativado. Agora só responderei por texto.")
+            return
+
+        #MODO SILENCIOSO
+        if comando_lower in ["desativar modo silencioso", "desligar modo silencioso", "pode falar"]:
+            self.modo_silencioso = False
+            self.falar("Modo silencioso desativado. Voltarei a falar normalmente.")
             return
 
         if comando_lower in ["ajuda", "menu"]:
